@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log/slog"
 	"os"
@@ -10,6 +11,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/openclaw/openclaw-go/internal/config"
 	"github.com/openclaw/openclaw-go/internal/discord"
+	"github.com/openclaw/openclaw-go/internal/dispatch"
+	"github.com/openclaw/openclaw-go/internal/gateway"
+	"github.com/openclaw/openclaw-go/internal/inbound"
 )
 
 func main() {
@@ -53,6 +57,9 @@ func main() {
 		DMEnabled:      true,
 		GroupDMEnabled: true,
 		GuildEntries:   nil,
+		DispatchInbound: func(ctx context.Context, msgCtx *inbound.MsgContext, d gateway.Dispatcher) error {
+			return dispatch.DispatchInbound(ctx, msgCtx, d)
+		},
 	}
 
 	s.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {

@@ -7,13 +7,9 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/openclaw/openclaw-go/internal/agent"
+	"github.com/openclaw/openclaw-go/internal/gateway"
 	"github.com/openclaw/openclaw-go/internal/inbound"
 )
-
-// Dispatcher sends replies to a channel (in-process, function call).
-type Dispatcher interface {
-	SendFinal(ctx context.Context, channelID, text string) error
-}
 
 // DiscordDispatcher sends replies via Discord API.
 type DiscordDispatcher struct {
@@ -32,7 +28,7 @@ func (d *DiscordDispatcher) SendFinal(ctx context.Context, channelID, text strin
 }
 
 // DispatchInbound processes the message via in-process agent and dispatches reply.
-func DispatchInbound(ctx context.Context, msgCtx *inbound.MsgContext, dispatcher Dispatcher) error {
+func DispatchInbound(ctx context.Context, msgCtx *inbound.MsgContext, dispatcher gateway.Dispatcher) error {
 	msgCtx.Finalize()
 	if strings.TrimSpace(msgCtx.BodyForCommands) == "" {
 		slog.Debug("dispatch: empty body, skip")

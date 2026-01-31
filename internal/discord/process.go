@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/openclaw/openclaw-go/internal/dispatch"
+	"github.com/openclaw/openclaw-go/internal/gateway"
 	"github.com/openclaw/openclaw-go/internal/inbound"
 )
 
@@ -48,17 +48,16 @@ func ProcessMessage(ctx context.Context, pre *PreflightContext, opts ProcessOpts
 		ReplyChannelID:     pre.ChannelID,
 	}
 
-	var d dispatch.Dispatcher
-	if opts.DiscordDispatcher != nil {
-		d = opts.DiscordDispatcher
+	if opts.Dispatcher == nil || opts.DispatchInbound == nil {
+		return nil
 	}
-
-	return dispatch.DispatchInbound(ctx, msgCtx, d)
+	return opts.DispatchInbound(ctx, msgCtx, opts.Dispatcher)
 }
 
 // ProcessOpts holds options for ProcessMessage.
 type ProcessOpts struct {
-	DiscordDispatcher *dispatch.DiscordDispatcher
+	DispatchInbound func(ctx context.Context, msgCtx *inbound.MsgContext, d gateway.Dispatcher) error
+	Dispatcher      gateway.Dispatcher
 }
 
 func buildFromLabel(pre *PreflightContext) string {
