@@ -44,7 +44,6 @@ func (h *MessageHandler) Handle(s *discordgo.Session, m *discordgo.MessageCreate
 
 	err := ProcessMessage(ctx, pre, ProcessOpts{
 		DiscordDispatcher: disp,
-		GatewayClient:     nil,
 	})
 	if err != nil {
 		slog.Error("discord process failed", "err", err, "msgId", pre.Message.ID)

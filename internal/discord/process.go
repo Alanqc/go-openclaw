@@ -53,13 +53,12 @@ func ProcessMessage(ctx context.Context, pre *PreflightContext, opts ProcessOpts
 		d = opts.DiscordDispatcher
 	}
 
-	return dispatch.DispatchInbound(ctx, msgCtx, opts.GatewayClient, d)
+	return dispatch.DispatchInbound(ctx, msgCtx, d)
 }
 
 // ProcessOpts holds options for ProcessMessage.
 type ProcessOpts struct {
 	DiscordDispatcher *dispatch.DiscordDispatcher
-	GatewayClient     *dispatch.GatewayClient
 }
 
 func buildFromLabel(pre *PreflightContext) string {
