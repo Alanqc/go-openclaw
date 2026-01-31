@@ -1,0 +1,17 @@
+# OpenClaw Go 配置示例
+# 复制为 openclaw.yaml 或放到 ~/.openclaw/openclaw.yaml
+
+agents:
+  defaults:
+    default_model: claude-sonnet
+  list:
+    - id: main
+
+bindings:
+  - agent_id: main
+    match:
+      channel: discord
+      account_id: "*"
+
+session:
+  dm_scope: main

@@ -1,0 +1,16 @@
+# Binary (root only, not cmd/openclaw-go/)
+/openclaw-go
+*.exe
+
+# Config with secrets (keep example)
+openclaw.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
