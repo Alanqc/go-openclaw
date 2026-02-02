@@ -21,12 +21,25 @@ func main() {
 	configPath := flag.String("config", "", "Config file path (or OPENCLAW_CONFIG env)")
 	flag.Parse()
 
+	// 本地认证文件：必须存在，否则提示并退出（该文件不提交、不 push）
+	secretsPath := config.ResolveSecretsPath()
+	if err := config.LoadSecrets(secretsPath); err != nil {
+		if os.IsNotExist(err) {
+			slog.Error("secrets file not found",
+				"path", secretsPath,
+				"hint", "create goopenclaw.secrets from goopenclaw.secrets.example and fill in DISCORD_TOKEN, MOONSHOT_API_KEY etc.")
+			os.Exit(1)
+		}
+		slog.Error("load secrets", "path", secretsPath, "err", err)
+		os.Exit(1)
+	}
+
 	token := *tokenFlag
 	if token == "" {
 		token = os.Getenv("DISCORD_TOKEN")
 	}
 	if token == "" {
-		slog.Error("discord token required (--token or DISCORD_TOKEN)")
+		slog.Error("discord token required (--token or DISCORD_TOKEN, or set in goopenclaw.secrets)")
 		os.Exit(1)
 	}
 

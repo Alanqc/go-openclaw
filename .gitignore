@@ -5,6 +5,10 @@
 # Config with secrets (keep example)
 openclaw.yaml
 
+# Local secrets file (never commit; use goopenclaw.secrets.example as template)
+goopenclaw.secrets
+.openclaw/goopenclaw.secrets
+
 # IDE
 .idea/
 .vscode/

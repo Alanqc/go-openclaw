@@ -1,8 +1,10 @@
 package config
 
 import (
+	"bufio"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -96,4 +98,48 @@ func ResolveConfigPath() string {
 		return filepath.Join(home, ".openclaw", "openclaw.yaml")
 	}
 	return "openclaw.yaml"
+}
+
+// ResolveSecretsPath returns path to secrets file (goopenclaw.secrets).
+// Order: OPENCLAW_SECRETS env > ./goopenclaw.secrets (cwd) > ~/.openclaw/goopenclaw.secrets.
+func ResolveSecretsPath() string {
+	if p := os.Getenv("OPENCLAW_SECRETS"); p != "" {
+		return p
+	}
+	if cwd, _ := os.Getwd(); cwd != "" {
+		return filepath.Join(cwd, "goopenclaw.secrets")
+	}
+	home, _ := os.UserHomeDir()
+	if home != "" {
+		return filepath.Join(home, ".openclaw", "goopenclaw.secrets")
+	}
+	return "goopenclaw.secrets"
+}
+
+// LoadSecrets reads path as KEY=VALUE lines (optional # comments) and sets each as os environment.
+// Used so DISCORD_TOKEN, MOONSHOT_API_KEY etc. can be read from file without committing secrets.
+func LoadSecrets(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		idx := strings.Index(line, "=")
+		if idx <= 0 {
+			continue
+		}
+		key := strings.TrimSpace(line[:idx])
+		val := strings.TrimSpace(line[idx+1:])
+		if key == "" {
+			continue
+		}
+		os.Setenv(key, val)
+	}
+	return sc.Err()
 }

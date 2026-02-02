@@ -53,17 +53,32 @@ Discord MessageCreate 事件
 
 ## 运行
 
+### 1. 本地认证文件（必做，且勿提交）
+
+程序启动时会**读取本地认证文件**；若**不存在会打印提示并退出**。
+
+1. 复制示例文件：`cp goopenclaw.secrets.example goopenclaw.secrets`
+2. 编辑 `goopenclaw.secrets`，填入你的 `DISCORD_TOKEN`、`MOONSHOT_API_KEY` 等（格式：`KEY=VALUE` 每行一个，`#` 为注释）
+3. **不要**将 `goopenclaw.secrets` 提交或 push 到远端（已加入 `.gitignore`）
+
+**查找顺序**：环境变量 `OPENCLAW_SECRETS` 指定路径 → 当前目录 `goopenclaw.secrets` → `~/.openclaw/goopenclaw.secrets`。
+
+### 2. 编译与启动
+
 ```bash
 cd go-openclaw
 go mod tidy
 go build -o openclaw-go ./cmd/openclaw-go
-./openclaw-go --token "YOUR_DISCORD_BOT_TOKEN"
+./openclaw-go
 ```
 
-环境变量：
+（Token 等已从 `goopenclaw.secrets` 读入，无需再传 `--token`，除非要覆盖。）
+
+环境变量（也可写在 goopenclaw.secrets 里）：
 - `DISCORD_TOKEN`：Discord Bot Token
 - `OPENCLAW_CONFIG`：配置文件路径（默认 `~/.openclaw/openclaw.yaml`）
-- `MOONSHOT_API_KEY`：使用 Kimi 插件时必填，月之暗面 API Key（[平台](https://platform.moonshot.cn) 创建）
+- `OPENCLAW_SECRETS`：认证文件路径（默认见上）
+- `MOONSHOT_API_KEY`：使用 Kimi 时必填，月之暗面 API Key（[平台](https://platform.moonshot.cn) 创建）
 
 ## 配置示例
 
