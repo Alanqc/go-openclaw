@@ -9,6 +9,7 @@ import (
 	"github.com/openclaw/openclaw-go/internal/agent"
 	"github.com/openclaw/openclaw-go/internal/gateway"
 	"github.com/openclaw/openclaw-go/internal/inbound"
+	"github.com/openclaw/openclaw-go/internal/llm"
 )
 
 // DiscordDispatcher sends replies via Discord API.
@@ -28,14 +29,15 @@ func (d *DiscordDispatcher) SendFinal(ctx context.Context, channelID, text strin
 }
 
 // DispatchInbound processes the message via in-process agent and dispatches reply.
-func DispatchInbound(ctx context.Context, msgCtx *inbound.MsgContext, dispatcher gateway.Dispatcher) error {
+// llmPlugin 来自 Runtime.LLM，可为 nil（则 agent 回显占位）。defaultModel 来自配置，可为空。
+func DispatchInbound(ctx context.Context, msgCtx *inbound.MsgContext, dispatcher gateway.Dispatcher, llmPlugin llm.Plugin, defaultModel string) error {
 	msgCtx.Finalize()
 	if strings.TrimSpace(msgCtx.BodyForCommands) == "" {
 		slog.Debug("dispatch: empty body, skip")
 		return nil
 	}
 
-	reply, err := agent.Run(ctx, msgCtx)
+	reply, err := agent.Run(ctx, msgCtx, llmPlugin, defaultModel)
 	if err != nil {
 		return err
 	}

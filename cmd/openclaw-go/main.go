@@ -12,6 +12,8 @@ import (
 	"github.com/openclaw/openclaw-go/internal/dispatch"
 	"github.com/openclaw/openclaw-go/internal/gateway"
 	"github.com/openclaw/openclaw-go/internal/inbound"
+	"github.com/openclaw/openclaw-go/internal/llm"
+	"github.com/openclaw/openclaw-go/internal/llm/kimi"
 )
 
 func main() {
@@ -38,11 +40,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	// 注册 LLM 插件（与 channel 插件解耦，后续换大模型只需换插件）
+	llm.Register(&kimi.Plugin{})
+
+	var llmPlugin llm.Plugin
+	if pid := cfg.Agents.Defaults.LLMProvider; pid != "" {
+		llmPlugin = llm.Get(llm.ProviderID(pid))
+		if llmPlugin == nil {
+			slog.Warn("llm provider not found, agent will echo only", "provider", pid)
+		}
+	}
+	defaultModel := ""
+	if cfg != nil {
+		defaultModel = cfg.Agents.Defaults.DefaultModel
+	}
+
 	// Gateway as main process: create runtime, register plugins, start channels.
 	rt := &gateway.Runtime{
 		Config: cfg,
+		LLM:    llmPlugin,
 		DispatchInbound: func(ctx context.Context, msgCtx *inbound.MsgContext, d gateway.Dispatcher) error {
-			return dispatch.DispatchInbound(ctx, msgCtx, d)
+			return dispatch.DispatchInbound(ctx, msgCtx, d, llmPlugin, defaultModel)
 		},
 	}
 	channels.Register(discord.Plugin{})

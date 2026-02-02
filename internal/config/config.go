@@ -23,6 +23,8 @@ type AgentsConfig struct {
 // AgentsDefaults holds default agent settings.
 type AgentsDefaults struct {
 	DefaultModel string `yaml:"default_model"`
+	// LLMProvider 指定使用的 LLM 插件 id（如 "kimi"），为空则不调用大模型。
+	LLMProvider string `yaml:"llm_provider"`
 }
 
 // AgentEntry represents a single agent in the list.
@@ -71,8 +73,11 @@ func Load(path string) (*Config, error) {
 func Default() *Config {
 	return &Config{
 		Agents: AgentsConfig{
-			Defaults: AgentsDefaults{DefaultModel: "claude-sonnet"},
-			List:    []AgentEntry{{ID: "main"}},
+			Defaults: AgentsDefaults{
+				DefaultModel: "kimi-k2-turbo-preview",
+				LLMProvider:  "kimi",
+			},
+			List: []AgentEntry{{ID: "main"}},
 		},
 		Bindings: nil,
 		Session: SessionConfig{
